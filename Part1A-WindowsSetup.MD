@@ -2,7 +2,7 @@ Part 1A: Setting up Ghidra
 
 This guide is done on Windows 10, and assumes you have some sort of git shell installed, and also that you're competent enough to be able to open cmd terminals at the location you want.
 
-1. get openjdk 11 lts hotspot https://adoptopenjdk.net/
+1. get openjdk 11 lts https://adoptium.net/
 2. install openjdk that you just downloaded (make sure to set JAVA_HOME path while installing)
 3. get ghidra https://github.com/NationalSecurityAgency/ghidra/releases/latest
 4. extract it (example ghidra_10.0.3_PUBLIC_20210908.zip), and move the folder (example "ghidra_10.0.3_PUBLIC") to C:/ghidra/ghidra_10.0.3_PUBLIC

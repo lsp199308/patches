@@ -2,7 +2,7 @@ Part 1B: Setting up Ghidra
 
 This guide is done on Ubuntu, and assumes you have git, wget and curl. They can be gotten by doing "sudo apt-get install -y wget curl git"
 
-1. Get openjdk 11 lts hotspot (cd ~ && wget https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz)
+1. Get openjdk 11 lts from https://adoptium.net/ (cd ~ && wget https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz)
 2. Extract openjdk that you just downloaded (cd ~ && mkdir ojdk11 && tar xvzf OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz -C ~/ojdk11)
 3. Set enviroment variable for JAVA_HOME (export JAVA_HOME=~/ojdk11/jdk-11.0.12+7) add this to .bashrc or .profile.
 4. Get ghidra (cd ~ && wget $(curl -s https://api.github.com/repos/NationalSecurityAgency/ghidra/releases/latest | grep "browser_download_url" | cut -d '"' -f 4) -O ~/ghidra.zip )

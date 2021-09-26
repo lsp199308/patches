@@ -26,13 +26,16 @@ Part 2 also assumes you have python 3 installed.
 
 *For this specific example the intent is to make a function that otherwise usually looks for X-Organization: Nintendo to be true, if it does not find it to be true your wifi/lan adapter is disabled. We're going to make it do the opposite.
 
-20. To find this offset of the function, you can look at the symbol tree, then NameSpaces, One of the SwitchD_XXXXXX numbers will look like this. (see picture)
+20. To find this offset of the function, you can look at the symbol tree, then NameSpaces, One of the SwitchD_XXXXXX numbers will look like this. (see picture) 
 
 ![alt text](https://github.com/borntohonk/patches/blob/master/img/ghidra-nifm-offset.png?raw=true)
 
-21. The patch we want to make is to change change out the instruction at that offset, with "MOV X0, XZR" + "RET" (E0 03 1F AA C0 03 5F D6)
+21. The patch we want to make is to change out the instruction at that offset, with "MOV X0, XZR" + "RET" (E0 03 1F AA C0 03 5F D6) - This will make the function at offset 01 07 14 to end instead of doing the function it previously did, essentially cutting it short. (These are ARM instructions)
 
 ![alt text](https://github.com/borntohonk/patches/blob/master/img/ghidra-nifm-after.png?raw=true)
 
+
+**note:** the offsets ghidra-loader gives you are -100, so the resulting offset we use in the next part is +100 (01 08 14, up from 01 07 14)
+
 22. To use this patch on the switch, you're going to want to save "50 41 54 43 48 01 08 14 00 08 E0 03 1F AA C0 03 5F D6 45 4F 46" as 8CB532EA199207191F04CE3DDECEC854C7CF07D6.ips (the build id that you got earlier) "50 41 54 43 48" is "PATCH", "01 08 14" is the offset we're patching, "00 08" is the length of patch we're applying, "E0 03 1F AA C0 03 5F D6" Is the patch we are applying at that offset (MOV X0, XZR" and "RET"), and 45 4F 46 is EOF. This effectively patches out the "connectivity test" and lets you use network functionality on closed networks where otherwise X-Organization: Nintendo would never be returned to the console.
-23. You should now have a functional patch for nifm, and it can be used with Atmosphere by putting it into /atmosphere/exefs_patches/nifm_ctest/8CB532EA199207191F04CE3DDECEC854C7CF07D6.ips
+23. You should now have a functional patch for nifm for system firmware version 13.0.0, and it can be used with Atmosphere by putting it into /atmosphere/exefs_patches/nifm_ctest/8CB532EA199207191F04CE3DDECEC854C7CF07D6.ips
