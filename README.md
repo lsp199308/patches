@@ -1,10 +1,7 @@
 Todo list:
 
-* describe how to set up ghidra (Covered in Part1A and Part1B) - Next add relevant images
-* describe how to configure ghidra with nintendo switch related loaders - Covered in Part1A and Part1B - Next add relevant images
-* document how to make patches with ghidra with examples - Covered nifm as primary example in Part 2 - Next add relevant images
-* Make independent guides for various other modules
-* publish documentation and guide with examples
+* format the guides more nicely
+* potentially whitelist commits from people who aren't incompetent or malicious
 * publish patches to this repository and configure auto-publishing on new commits
 
 * [Part 1A detailing how to set up ghidra and the switch loader for windows](Part1A-WindowsSetup.MD)
@@ -15,4 +12,6 @@ Todo list:
 * [Guide describing how to patch ES, - TitleID 0100000000000033.](ES-0100000000000033.md)
 
 
-Other guides will be linked in this README.md but be be published without any context of the previous guides, assuming the tutorial on how to do things is over.
+Other guides will be linked in this README.md but be be published without any context of the previous guides, assuming the tutorial on how to do things is over. part 1 and part 2 are considered the tutorial.
+
+-Credits: me (@borntohonk)
