@@ -10,5 +10,6 @@ Todo list:
 * [Part 1A detailing how to set up ghidra and the switch loader for windows](Part1A-WindowsSetup.MD)
 * [Part 1B detailing how to set up ghidra and the switch loader for linux](Part1B-LinuxSetup.MD)
 * [Part 2 detailing how to to use ghidra to from ground up make a patch for nifm.](Part2.MD)
+* [Guide describing how to patch out the online check in Diablo 2 Resurrected - TitleID 0100726014352000/0100726014352800.](D2R-0100726014352800-65536-v131072.md)
 
 Other guides will be linked in this README.md but be be published without any context of the previous guides, assuming the tutorial on how to do things is over.
