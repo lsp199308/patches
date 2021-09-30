@@ -33,5 +33,3 @@ with open('main', 'rb') as fi:
 
     text_file.write(y)
     text_file.close()
-
-    

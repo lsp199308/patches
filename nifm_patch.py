@@ -18,12 +18,8 @@ def build_id():
 
 with open('main', 'rb') as fi:
     read_data = fi.read()
-    result = re.findall(b'\xf9...\x39...\xf9...\x91...\xf9...\xaa...\xf9...\x2a...\xa8...\x17', read_data)[0]
-    i = read_data.find(result)
-    while i >= 0:
-        i += len(result)
-        nifm_offset = ("%02X"%i)
-        i = read_data.find(result, i)
+    result = re.search(b'.{16}\xf5\x03\x01\xaa\xf4\x03\x00\xaa.{4}\xf3\x03\x14\xaa\xe0\x03\x14\xaa\x9f\x02\x01\x39\x7f\x8e\x04\xf8.{4}\xe0\x03\x14\xaa\xe1\x03\x15\xaa.{4}', read_data)
+    nifm_offset = (hex (result.start()))[2:]
     build_id()
     text_file = open(buildid + ".ips", "wb")
     print("nifm build-id: " + buildid)
