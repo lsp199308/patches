@@ -18,7 +18,7 @@ Todo list:
 
 
 
-* [Python script to process dumped FW files from system partition and make patches for the system firmware version that was dumped. Usage: make a directory in the organize folder (example 1300 for 13.0.0, or just generic "firmware" instead of numbered folders, anything works.), then place the dumped nca.00/nca files/folders (both works) in a sub-folder called "nca" (example: organize/1300/nca/*.nca), then use "python3 organize.py". The patches will be output to the atmosphere folder, ready to be packed up and pushed as a release](organize/organize.py)
+* [Python script to process dumped FW files from system partition and make patches for the system firmware version that was dumped. Usage: make a directory in the organize folder (example 13.0.0 , or just generic "firmware" instead of numbered folders, anything works.), then place the dumped nca.00/nca files/folders (both works) in a sub-folder called "nca" (example: organize/13.0.0/nca/*.nca), then use "python3 organize.py". The patches will be output to the atmosphere folder, ready to be packed up and pushed as a release](organize/organize.py)
 
 Other guides will be linked in this README.md but be be published without any context of the previous guides, assuming the tutorial on how to do things is over. part 1 and part 2 are considered the tutorial.
 
