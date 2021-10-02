@@ -7,64 +7,18 @@ import subprocess
 import shutil
 import errno
 import hashlib
-import time
 import re
-import struct
 from pathlib import Path
-# repurposed from https://gist.github.com/roblabla/d82c440908d08c8a232ac483e6be7202
-# CNMT parser shamelessly stolen from https://github.com/Rikikooo/CDNSP/blob/master/lib/CNMT.py
-from struct import pack as pk, unpack as upk
-def read_at(fp, off, len):
-    fp.seek(off)
-    return fp.read(len)
 
-def read_u8(fp, off):
-    return upk('<B', read_at(fp, off, 1))[0]
+def get_es_build_id():
+  with open(version + "/ues.nso0", "rb") as f:
+    f.seek(0x40)
+    return(f.read(0x14).hex().upper())
 
-def read_u16(fp, off):
-    return upk('<H', read_at(fp, off, 2))[0]
-
-def read_u32(fp, off):
-    return upk('<I', read_at(fp, off, 4))[0]
-
-def read_u48(f, off):
-    s = upk('<HI', read_at(f, off, 6))
-    return s[1] << 16 | s[0]
-
-def read_u64(fp, off):
-    return upk('<Q', read_at(fp, off, 8))[0]
-
-def es_build_id():
-    global estext_offset
-    global estext_size
-    global esbuildid
-    with open(version + "/ues.nso0", "rb") as f:
-        f.seek(0x10)
-        estext_offset = struct.unpack('<I',f.read(4))[0]
-        f.seek(0x18)
-        estext_size = struct.unpack('<I',f.read(4))[0]
-        f.seek(0x40)
-        esraw_buildid = f.read(0x14)
-        esbuildid = esraw_buildid.hex().upper()
-        f.close
-    estext_offset *= 8
-    estext_size *= 8
-
-def nifm_build_id():
-    global nifmtext_offset
-    global nifmtext_size
-    global nifmbuildid
-    with open(version + "/unifm.nso0", "rb") as f:
-        f.seek(0x10)
-        nifmtext_offset = struct.unpack('<I',f.read(4))[0]
-        f.seek(0x18)
-        nifmtext_size = struct.unpack('<I',f.read(4))[0]
-        f.seek(0x40)
-        nifmraw_buildid = f.read(0x14)
-        nifmbuildid = nifmraw_buildid.hex().upper()
-        f.close
-    nifmtext_offset *= 8
-    nifmtext_size *= 8
+def get_nifm_build_id():
+  with open(version + "/unifm.nso0", "rb") as f:
+    f.seek(0x40)
+    return(f.read(0x14).hex().upper())
 
 class CNMT:
     title_types = {
@@ -268,7 +222,6 @@ for version in os.listdir("."):
         symlink_force("../../nca/" + nca, version + "/titleid/" + titleId + "/" + contentType + ".nca")
 
     print("# Extracting ES")
-    esTemp = version + "/esbuildid"
     esFull = version + "/"
     ncaParent = version + "/titleid/0100000000000033"
     ncaPartial = ncaParent + "/Program.nca"
@@ -278,26 +231,7 @@ for version in os.listdir("."):
     process = subprocess.Popen(["sh", "-c", f"{HACTOOL_PROGRAM} -tnso0 '{ncaFull}' --uncompressed '{version}/ues.nso0'"], stdout=subprocess.DEVNULL)
     process.wait()
 
-    with open(esFull + 'ues.nso0', 'rb') as fi:
-        read_data = fi.read()
-    result = re.findall(b'\x1f\x01\x09\xeb\x61\x00\x00\x54\xf3\x03\x1f\xaa\x02\x00\x00\x14\x33\xd2\x85\x52\xe0.\x00\x91.{3}\x94.\x63\x00.{3}\x00\x94\xa0.{2}\xd1.{2}\xff\x97', read_data)[0]
-    i = read_data.find(result)
-
-    while i >= 0:
-        i += len(result)
-        es_offset = ("%02X"%i)
-        i = read_data.find(result, i)
-    es_build_id()
-    text_file = open("../atmosphere/exefs_patches/es_patches/" + esbuildid + ".ips", "wb")
-    print(version + " esbuildid: " + esbuildid)
-    print(version + " found ES offset at: " + es_offset)
-    y = bytes.fromhex(str("50415443480" + es_offset + "0004E0031FAA454F46"))
-
-    text_file.write(y)
-    text_file.close()
-
     print("# Extracting NIFM")
-    nifmTemp = version + "/nifmbuildid"
     nifmFull = version + "/"
     ncaParent = version + "/titleid/010000000000000f"
     ncaPartial = ncaParent + "/Program.nca"
@@ -306,23 +240,6 @@ for version in os.listdir("."):
     process.wait()
     process = subprocess.Popen(["sh", "-c", f"{HACTOOL_PROGRAM} -tnso0 '{ncaFull}' --uncompressed '{version}/unifm.nso0'"], stdout=subprocess.DEVNULL)
     process.wait()
-    with open(nifmFull + 'unifm.nso0', 'rb') as fi:
-        read_data = fi.read()
-    result = re.findall(b'\xf9...\x39...\xf9...\x91...\xf9...\xaa...\xf9...\x2a...\xa8...\x17', read_data)[0]
-    i = read_data.find(result)
-
-    while i >= 0:
-        i += len(result)
-        nifm_offset = ("%02X"%i)
-        i = read_data.find(result, i)
-    nifm_build_id()
-    text_file = open("../atmosphere/exefs_patches/nifm_ctest/" + nifmbuildid + ".ips", "wb")
-    print(version + " nifmbuildid: " + nifmbuildid)
-    print(version + " found nifm offset at: " + nifm_offset)
-    y = bytes.fromhex(str("50415443480" + nifm_offset + "0008E0031FAAC0035FD6454F46"))
-
-    text_file.write(y)
-    text_file.close()
 
     print("# Extracting fat32")
     ncaParent = version + "/titleid/0100000000000819"
@@ -340,35 +257,6 @@ for version in os.listdir("."):
     fsCopy = version  + "/fat32FS.kip1"
     fat32hash = hashlib.sha256(open(fat32Compressed, 'rb').read()).hexdigest().upper()
     
-    process = shutil.copyfile(fat32Compressed, fsCopy)
-
-    with open(fat32Full, 'rb') as fi1:
-        read_data = fi1.read()
-    result1 = re.findall(b'.{3}\x12.{3}\x71.{3}\x54.{3}\x12.{3}\x71.{3}\x54.{3}\x36.{3}\xf9', read_data)[0]
-
-    i1 = read_data.find(result1)
-    while i1 >= 0:
-        i1 += len(result1)
-        fs_offset_1 = ("%02X"%i1)
-        i1 = read_data.find(result1, i1)
-
-    result2 = re.findall(b'.{3}\xaa.{3}\x97.{3}\x36.{3}\x91.{3}\xaa.{7}\xaa.{11}\xaa.{7}\x52.{3}\x72.{3}\x97', read_data)[0]
-    i2 = read_data.find(result2)
-    while i2 >= 0:
-        i2 += len(result2)
-        fs_offset_2 = ("%02X"%i2)
-        i2 = read_data.find(result2, i2)
-
-    patch1 = "0" + fs_offset_1 + "0004" + "E0031F2A"
-    patch2 = "0" + fs_offset_2 + "0004" + "1F2003D5"
-    text_file = open('../atmosphere/kip_patches/fs_patches/%s.ips' % fat32hash, 'wb')
-    print(version + " fat32hash: " + fat32hash)
-    print (version + " found first offset at: " + fs_offset_1)
-    print (version + " found second offset at: " + fs_offset_2)
-    y = bytes.fromhex(str("5041544348" + patch1 + patch2 + "454F46"))
-    text_file.write(y)
-    text_file.close()
-
     print("# Extracting exfat")
     ncaParent = version + "/titleid/010000000000081b"
     pk21dir = ncaParent + "/package2"
@@ -383,34 +271,53 @@ for version in os.listdir("."):
     process.wait()
     exfatCompressed = version + "/titleid/010000000000081b/ini1/FS.kip1"
     fsCopy = version  + "/exfatFS.kip1"
-    exfathash = hashlib.sha256(open(exfatCompressed, 'rb').read()).hexdigest().upper()
     process = shutil.copyfile(exfatCompressed, fsCopy)
 
-    with open(exfatFull, 'rb') as fi1:
-        read_data = fi1.read()
-    result1 = re.findall(b'.{3}\x12.{3}\x71.{3}\x54.{3}\x12.{3}\x71.{3}\x54.{3}\x36.{3}\xf9', read_data)[0]
+    print("# Making sigpatches")
+    esuncompressed = version + "/ues.nso0"
+    nifmuncompressed = version + "/unifm.nso0"
+    exfatuncompressed = version + "/u_exfatFS.kip1"
+    fat32uncompressed = version + "/u_fat32FS.kip1"
+    fat32compressed = version + "/exfatFS.kip1"
+    exfatcompressed = version + "/fat32FS.kip1"
 
-    i1 = read_data.find(result1)
-    while i1 >= 0:
-        i1 += len(result1)
-        fs_offset_1 = ("%02X"%i1)
-        i1 = read_data.find(result1, i1)
+    with open(esuncompressed, 'rb') as fi:
+        read_data = fi.read()
+    result = re.search(b'\x1f\x01\x09\xeb\x61\x00\x00\x54\xf3\x03\x1f\xaa\x02\x00\x00\x14\x33\xd2\x85\x52\xe0.\x00\x91.{3}\x94.\x63\x00.{3}\x00\x94\xa0.{2}\xd1.{2}\xff\x97', read_data)
+    patch = "%06X%s%s" % (result.end(), "0004", "E0031FAA")
+    text_file = open("../atmosphere/exefs_patches/es_patches/" + get_es_build_id() + ".ips", "wb")
+    print("es build-id: " + get_es_build_id())
+    print("es offset and patch at: " + patch)
+    text_file.write(bytes.fromhex(str("5041544348" + patch + "454F46")))
+    text_file.close()
 
-    result2 = re.findall(b'.{3}\xaa.{3}\x97.{3}\x36.{3}\x91.{3}\xaa.{7}\xaa.{11}\xaa.{7}\x52.{3}\x72.{3}\x97', read_data)[0]
-    i2 = read_data.find(result2)
-    while i2 >= 0:
-        i2 += len(result2)
-        fs_offset_2 = ("%02X"%i2)
-        i2 = read_data.find(result2, i2)
+    with open(nifmuncompressed, 'rb') as fi:
+        read_data = fi.read()
+    result = re.search(b'.{16}\xf5\x03\x01\xaa\xf4\x03\x00\xaa.{4}\xf3\x03\x14\xaa\xe0\x03\x14\xaa\x9f\x02\x01\x39\x7f\x8e\x04\xf8.{4}\xe0\x03\x14\xaa\xe1\x03\x15\xaa.{4}', read_data)
+    text_file = open("../atmosphere/exefs_patches/nifm_ctest/" + get_nifm_build_id() + ".ips", "wb")
+    patch = "%06X%s%s" % (result.start(), "0008", "E0031FAAC0035FD6")
+    print("nifm build-id: " + get_nifm_build_id())
+    print("nifm offset and patch at: " + patch)
+    text_file.write(bytes.fromhex(str("5041544348" + patch + "454F46")))
+    text_file.close()
 
-    patch1 = "0" + fs_offset_1 + "0004" + "E0031F2A"
-    patch2 = "0" + fs_offset_2 + "0004" + "1F2003D5"
+    with open(exfatuncompressed, 'rb') as fi1:
+       read_data = fi1.read()
+    result1 = re.search(b'.{3}\x12.{3}\x71.{3}\x54.{3}\x12.{3}\x71.{3}\x54.{3}\x36.{3}\xf9', read_data)
+    result2 = re.search(b'.{3}\xaa.{3}\x97.{3}\x36.{3}\x91.{3}\xaa.{7}\xaa.{11}\xaa.{7}\x52.{3}\x72.{3}\x97', read_data)
+    patch1 = "%06X%s%s" % (result1.end(), "0004", "E0031F2A")
+    patch2 = "%06X%s%s" % (result2.end(), "0004", "1F2003D5")
+    exfathash = hashlib.sha256(open(exfatcompressed, 'rb').read()).hexdigest().upper()
+    print("found FS first offset and patch at: " + patch1)
+    print("found FS second offset and patch at: " + patch2)
+    print("exfat sha256: " + exfathash)
     text_file = open('../atmosphere/kip_patches/fs_patches/%s.ips' % exfathash, 'wb')
-    print(version + " exfathashash: " + exfathash)
-    print (version + " found first offset at: " + fs_offset_1)
-    print (version + " found second offset at: " + fs_offset_2)
-    y = bytes.fromhex(str("5041544348" + patch1 + patch2 + "454F46"))
-    text_file.write(y)
+    text_file.write(bytes.fromhex(str("5041544348" + patch1 + patch2 + "454F46")))
+    text_file.close()
+    fat32hash = hashlib.sha256(open(fat32compressed, 'rb').read()).hexdigest().upper()
+    print("fat32 sha256: " + fat32hash)
+    text_file = open('../atmosphere/kip_patches/fs_patches/%s.ips' % fat32hash, 'wb')
+    text_file.write(bytes.fromhex(str("5041544348" + patch1 + patch2 + "454F46")))
     text_file.close()
 
     print("# Verifying the dump is complete")

@@ -2,7 +2,7 @@ Todo list:
 
 * format the guides more nicely
 * potentially whitelist commits from people who aren't incompetent or malicious
-* publish patches to this repository and configure auto-publishing on new commits (not needed for now)
+* publish patches to this repository and configure auto-publishing on new commits (configured suppository by adding in patches as submodule https://github.com/borntohonk/suppository/blob/master/update_patches.sh)
 * adjust es/fs guides to be more understandable (better formatting and corrections)
 
 * [Part 1A detailing how to set up ghidra and the switch loader for windows](Part1A-WindowsSetup.MD)
